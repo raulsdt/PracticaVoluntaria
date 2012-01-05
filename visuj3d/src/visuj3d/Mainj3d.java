@@ -20,6 +20,7 @@ import javax.media.j3d.PolygonAttributes;
 import com.sun.j3d.utils.behaviors.mouse.MouseRotate;
 import com.sun.j3d.utils.behaviors.mouse.MouseTranslate;
 import com.sun.j3d.utils.behaviors.mouse.MouseZoom;
+import java.util.Random;
 
 
 //import com.sun.j3d.utils.behaviors.picking.Intersect;
@@ -178,7 +179,7 @@ public void pintar3D (TransformGroup trans) throws Exception
 {
     
                 //pintaEjes(trans);
-                pintaCuadricula(trans);
+                //pintaCuadricula(trans);
     /*
 		Punto pp = new Punto(0,0);
                 VisuPunto vpp = new VisuPunto (pp);
@@ -230,11 +231,29 @@ public void pintar3D (TransformGroup trans) throws Exception
                 boolean intersecta = tr.intersectaRayo3d(r);
                 System.out.println ("El rayo intersecta: " + intersecta);
       */        
-                ObjetoTrian ot = new ObjetoTrian ("./objetos3d/pajaro_1.obj");
+                Random rnd = new Random(50);
+                NubePuntos3d nube = new  NubePuntos3d(20,new Color3f(1,0,0));
+
+                for (int j=0;j<20;j++){
+
+                    nube.addPunto(new Punto3d(rnd.nextFloat()*(90-(-90)+1)+(-90), rnd.nextFloat()*(90-(-90)+1)+(-90),rnd.nextFloat()*(90-(-90)+1)+(-90)));
+
+                }
+//                VisuNube3d vinube = new VisuNube3d(nube);
+//                vinube.pinta(trans,cadenaApp());
+                
+                ObjetoTrian ot = new ObjetoTrian ("./objetos3d/lata_cerveza.obj");
                 VisuObjetoTrian vot = new VisuObjetoTrian (ot);
                 vot.pinta(trans,cadenaApp(0.3f,0.3f));
                
-                Punto3d pin = new Punto3d (0, 0,-40);
+                for(int j=0;j<nube.numPuntos();j++){
+                    if(ot.puntoEnObjeto(new Punto3d(-0.2f,0.39f,0.03f))){
+                        VisuPunto3d viPunto = new VisuPunto3d(new Punto3d(-0.2f,0.39f,0.03f));
+                        viPunto.pinta(trans, cadenaApp(), 0.0f, 1.0f, 0.0f);
+                    }
+                }
+                
+                Punto3d pin = new Punto3d (0, 0,0);
                 VisuPunto3d vpin = new VisuPunto3d(pin);
                 vpin.pinta(trans,cadenaApp());
                 NubePuntos3d np = new NubePuntos3d(ot.getNubePuntos());

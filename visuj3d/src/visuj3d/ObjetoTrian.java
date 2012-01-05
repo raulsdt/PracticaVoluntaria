@@ -176,25 +176,8 @@ public class ObjetoTrian {
     }
 
     public int numTriangulos() {
-        int k = 1; // k=3 es un triangulo
-        int ntriangulos = 0;
-        for (int j = 0; j < nPuntos; j++) {
-
-
-            // formar aqu�un triangulo;ejemplo:
-            if (k == 1) {
-                k++;
-            }
-            if (k == 2) {
-                k++;
-            }
-            // con k==3 tengo un nuevo tri�gulo
-            if (k == 3) {
-                k = 1;
-                ntriangulos++;
-            }
-        }
-        return ntriangulos;
+      
+        return ta.getVertexCount()/3;
     }
 
         boolean nubeValida 
@@ -279,33 +262,30 @@ public class ObjetoTrian {
             array[(3 * j) + 2] = (float) punto3d.getZ();
         }
         //No estoy seguro de que lo de nPuntos sea correcto
-        return (iu.rayTriangleArray(result, dir, 0.0f, array, numTriangulos(), result, true));
+        return (iu.rayTriangleArray(result, dir, 0.0f,array, numTriangulos(), result, true));
 
     }
 
     public boolean puntoEnObjeto(Punto3d p) throws ErrorRangoObjInvalido {
-        Vector3d direccion = new Vector3d(3, 5, 6);//Cualquier direccion
-        Rayo3d r = new Rayo3d(p, direccion);
-        int k = 1; // k=3 es un triangulo
-        int intersecta = 0;
-        Punto3d p1 = null, p2 = null, p3;
-                for (int j = 0; j < nPuntos; j++) {
-                                        
-                    // formar aqu�un triangulo;ejemplo:
-                    if (k==1)  p1 = new Punto3d(getPunto(3*j)); 
-                    if (k==2)  p2 = new Punto3d(getPunto(3*j + 1));
-                    // con k==3 tengo un nuevo tri�gulo
-                    if (k==3) {p3 = new Punto3d(getPunto(3*j + 2)); 
+        Vector3d direccion = new Vector3d(100,80,100);//Cualquier direccion
+        Rayo3d r = new Rayo3d(new Vector3d(p.getX(), p.getY(), p.getZ()), direccion);
+        int numIntersecta = 0;
+        Punto3d p1=null , p2=null , p3=null;
+                for (int j = 0; j < nPuntos; j+=3) {
+                     
+                     p1 = new Punto3d(getPunto(j)); 
+                     p2 = new Punto3d(getPunto(j + 1));  
+                     p3 = new Punto3d(getPunto(j + 2)); 
+                     
                     // ya tenemos un tri�gulo al que aplicar la intersecci�
                     Triangulo3d t = new Triangulo3d(p1, p2, p3);
+
                     if(t.intersectaRayo3d(r)){
-                        intersecta++;
+                        numIntersecta++;
                     }
-                    k=1;
-                    
-                    }		  
+                    		  
                 }
-                if(intersecta%2 == 1) return true;
+                if(numIntersecta%2 == 1) return true;
                 else return false;
         
 
@@ -316,17 +296,18 @@ public class ObjetoTrian {
         float array[] = new float[nPuntos];
         //Obtener las coordenadas X,Y,Z de cada uno de los puntos almacenados
         //en la estructura TriangleArray
-        for (int j = 0; j < nPuntos; j++) {
+        for (int j = 0; j < nPuntos; j+=3) {
 
             Punto3d punto3d = new Punto3d(getPunto(j));
-            array[3 * j] = (float) punto3d.getX();
-            array[(3 * j) + 1] = (float) punto3d.getY();
-            array[(3 * j) + 2] = (float) punto3d.getZ();
+            array[j] = (float) punto3d.getX();
+            array[j + 1] = (float) punto3d.getY();
+            array[j + 2] = (float) punto3d.getZ();
         }
         coordenadas.translate(array, nPuntos, (float)dx, (float)dy, (float)dz);
     }
     
     private float[] getMinMax() throws ErrorRangoObjInvalido{
+  
         float minZ = 900,minY = 900, minX = 900;
         float maxZ = 0,maxY = 0, maxX = 0;
         float array[] = new float[6];
@@ -369,7 +350,6 @@ public class ObjetoTrian {
     public CajaEnvolvente getCajaEnvolvente() throws ErrorRangoObjInvalido{
         float array[] = new float[6];
         array = getMinMax();
-        
         Point3d min = new Point3d(array[0], array[1], array[2]);
         Point3d max = new Point3d(array[3], array[4], array[5]);
         BoundingBox limites = new BoundingBox(min, max);
