@@ -131,7 +131,8 @@ public class ObjetoTrian {
                 int tama_puntos = puntos.length;
                 nPuntos = (int) (tama_puntos / 6);
                 color = new Color3f(1f, 0f, 1f);
-                formato = TriangleArray.COORDINATES | TriangleArray.COLOR_3;
+                //TriangleArray.COORDINATES | TriangleArray.COLOR_3;
+                formato = TriangleArray.COORDINATES | TriangleArray.COLOR_3; 
                 Point3d p1, p2, p3;
                 ta = new TriangleArray(nPuntos, formato);
 
@@ -177,7 +178,7 @@ public class ObjetoTrian {
 
     public int numTriangulos() {
       
-        return ta.getVertexCount()/3;
+        return nPuntos/3;
     }
 
         boolean nubeValida 
@@ -243,43 +244,57 @@ public class ObjetoTrian {
     }
 
     //Metodos propios
+    /**
+     * Comprueba la intersección de un rayo con un objeto
+     * @param r rayo 
+     * @return true si se produce interseccion, falso en caso contrario
+     * @throws ErrorRangoObjInvalido 
+     */
     public boolean IntersectaRayo3d(Rayo3d r) throws ErrorRangoObjInvalido {
         IntersectionUtils iu = new IntersectionUtils();
-        Point3d origen = new Point3d(r.getOrigen().getVector3d());
+        
+        Point3d origen = new Point3d(r.getOrigen().getX(),r.getOrigen().getY(),r.getOrigen().getZ());
         Vector3d dir = new Vector3d(r.getDireccion());
+        
         //Punto en el cual se devuelve el valor de intersección
         Point3d result = new Point3d();
 
         //Array de float para ejecutar la interseccion
-        float array[] = new float[nPuntos];
+        float array[] = new float[nPuntos * 3];
+        
         //Obtener las coordenadas X,Y,Z de cada uno de los puntos almacenados
         //en la estructura TriangleArray
         for (int j = 0; j < nPuntos; j++) {
-
             Punto3d punto3d = new Punto3d(getPunto(j));
-            array[3 * j] = (float) punto3d.getX();
-            array[(3 * j) + 1] = (float) punto3d.getY();
-            array[(3 * j) + 2] = (float) punto3d.getZ();
+            array[3 * j] = (float) punto3d.getX()*Geometria.RANGO;
+            array[3 * j + 1] = (float) punto3d.getY()*Geometria.RANGO;
+            array[3 * j + 2] = (float) punto3d.getZ()*Geometria.RANGO;
         }
-        //No estoy seguro de que lo de nPuntos sea correcto
-        return (iu.rayTriangleArray(result, dir, 0.0f,array, numTriangulos(), result, true));
+        
+        return (iu.rayTriangleArray(origen, dir,0,array, nPuntos / 3, result, true));
 
     }
 
+    /**
+     * Comprueba si un punto esta contenido en un objeto    
+     * @param p Punto
+     * @return True si esta contenido, false en caso contrario
+     * @throws ErrorRangoObjInvalido 
+     */ 
     public boolean puntoEnObjeto(Punto3d p) throws ErrorRangoObjInvalido {
         Vector3d direccion = new Vector3d(100,80,100);//Cualquier direccion
-        Rayo3d r = new Rayo3d(new Vector3d(p.getX(), p.getY(), p.getZ()), direccion);
+        Rayo3d r = new Rayo3d(new Vector3d(p.getX()/Geometria.RANGO, p.getY()/Geometria.RANGO, p.getZ()/Geometria.RANGO), direccion);
         int numIntersecta = 0;
         Punto3d p1=null , p2=null , p3=null;
+
                 for (int j = 0; j < nPuntos; j+=3) {
-                     
                      p1 = new Punto3d(getPunto(j)); 
                      p2 = new Punto3d(getPunto(j + 1));  
                      p3 = new Punto3d(getPunto(j + 2)); 
                      
                     // ya tenemos un tri�gulo al que aplicar la intersecci�
                     Triangulo3d t = new Triangulo3d(p1, p2, p3);
-
+                    //t.out();
                     if(t.intersectaRayo3d(r)){
                         numIntersecta++;
                     }
@@ -290,22 +305,37 @@ public class ObjetoTrian {
         
 
     }
-
+    /**
+     * Desplaza el objeto una cantidad determinada en cada dirección
+     * @param dx Desplazamiento en dirección del eje X
+     * @param dy Desplazamiento en dirección del eje Y
+     * @param dz Desplazamiento en dirección del eje Z
+     * @throws ErrorRangoObjInvalido 
+     */
     public void mover(double dx, double dy, double dz) throws ErrorRangoObjInvalido {
         CoordinateUtils coordenadas = new CoordinateUtils();
-        float array[] = new float[nPuntos];
+        float array[] = new float[nPuntos*3];
         //Obtener las coordenadas X,Y,Z de cada uno de los puntos almacenados
         //en la estructura TriangleArray
-        for (int j = 0; j < nPuntos; j+=3) {
+        for (int j = 0; j < nPuntos; j++) {
 
             Punto3d punto3d = new Punto3d(getPunto(j));
-            array[j] = (float) punto3d.getX();
-            array[j + 1] = (float) punto3d.getY();
-            array[j + 2] = (float) punto3d.getZ();
+            array[3 * j] = (float) punto3d.getX();
+            array[3 * j + 1] = (float) punto3d.getY();
+            array[3 * j + 2] = (float) punto3d.getZ();
         }
-        coordenadas.translate(array, nPuntos, (float)dx, (float)dy, (float)dz);
+        coordenadas.translate(array, nPuntos, (float) dx / Geometria.RANGO,(float) dy / Geometria.RANGO, (float)dz / Geometria.RANGO);
+        
+        for(int j=0; j <nPuntos;j++){
+            ta.setCoordinate(j, new Point3d(array[3*j], array[3*j +1], array[3*j +2]));
+        }
     }
     
+    /**
+     * Obtiene el valor d elos puntos que definen la caja envolvente
+     * @return devuelve un Array[6] con los 2 puntos que definen la caja envolvente
+     * @throws ErrorRangoObjInvalido 
+     */
     private float[] getMinMax() throws ErrorRangoObjInvalido{
   
         float minZ = 900,minY = 900, minX = 900;
@@ -346,7 +376,11 @@ public class ObjetoTrian {
         return array;                
                 
     }
-    
+    /**
+     * Construye la caja envolvente del objeto
+     * @return Devuelve la caja envolvente 
+     * @throws ErrorRangoObjInvalido 
+     */
     public CajaEnvolvente getCajaEnvolvente() throws ErrorRangoObjInvalido{
         float array[] = new float[6];
         array = getMinMax();

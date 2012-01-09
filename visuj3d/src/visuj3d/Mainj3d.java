@@ -1,20 +1,11 @@
 package visuj3d;
 
-
-/**
- *
- * @author lidia
- */
-
 import java.applet.*;
 import java.awt.*;
 import javax.media.j3d.*;
 import javax.vecmath.*;
 import com.sun.j3d.utils.applet.MainFrame;
 import com.sun.j3d.utils.universe.SimpleUniverse;
-import com.sun.j3d.utils.geometry.ColorCube;
-import javax.media.j3d.QuadArray;
-import javax.media.j3d.Shape3D;
 import javax.media.j3d.Appearance;
 import javax.media.j3d.PolygonAttributes;
 import com.sun.j3d.utils.behaviors.mouse.MouseRotate;
@@ -175,90 +166,77 @@ public void pintaCuadricula (TransformGroup trans) throws Exception{
 
 /**Modificar la siguiente funcion:*/
 /** Define lo que va a visualizarse en pantalla*/   
-public void pintar3D (TransformGroup trans) throws Exception
-{
+public void pintar3D (TransformGroup trans) throws Exception{
     
-                //pintaEjes(trans);
-                //pintaCuadricula(trans);
-    /*
-		Punto pp = new Punto(0,0);
-                VisuPunto vpp = new VisuPunto (pp);
-                vpp.pinta(trans, cadenaApp());
-                
-		
-		Punto kk = new Punto (100,100);
-                VisuPunto vkk = new VisuPunto(kk);
-		vkk.pinta(trans,cadenaApp());
-                
+    /*********** GENERAMOS LA NUBE DE PUNTOS ***********/
+    Random rnd = new Random(50);
+    NubePuntos3d nube = new NubePuntos3d(20, new Color3f(1, 0, 0));
 
-		Segmento sg = new Segmento (pp,kk);
-                VisuSegmento vsg = new VisuSegmento(sg);
-		vsg.pinta(trans,cadenaApp());
-		
-                
-                
-                Punto3d tt = new Punto3d(50,50,-10);
-                VisuPunto3d vtt = new VisuPunto3d (tt);
-                //vtt.pinta(trans, cadenaApp());
-                
-                Punto3d ss = new Punto3d(50,50,70);
-                VisuPunto3d vss = new VisuPunto3d (ss);
-                //vss.pinta(trans, cadenaApp());
-                
-                Segmento3d dd = new Segmento3d (tt,ss);
-                VisuSegmento3d vdd = new VisuSegmento3d (dd);
-                vdd.pinta (trans, cadenaApp());
-                
-                
-                NubePuntos3d nt = new NubePuntos3d (5);
-		nt.addPunto(new Punto3d(90,0.0, 20)); 
-		nt.addPunto(new Punto3d(80,30,-20));
-		nt.addPunto(new Punto3d(30,0.0,40));
-		nt.addPunto(new Punto3d(50,-20,20));
-		nt.addPunto(new Punto3d(70,-70,20));
-                VisuNube3d vnt = new VisuNube3d(nt);
-                vnt.pinta(trans,cadenaApp());
-      
-                
-                Triangulo3d tr = new Triangulo3d (new Punto3d(45 ,45,45), new Punto3d(-45.0,45,45), new Punto3d(45,9,45));
-                VisuTriangulo3d vtr = new VisuTriangulo3d(tr);
-                vtr.pinta(trans, cadenaApp());
-                
-                Rayo3d r = new Rayo3d (new Punto3d(0,0,0), new Punto3d(-30, 40, 80));
-                VisuRayo3d vrr = new VisuRayo3d (r);
-                vrr.pinta(trans, cadenaApp());
-                
-                boolean intersecta = tr.intersectaRayo3d(r);
-                System.out.println ("El rayo intersecta: " + intersecta);
-      */        
-                Random rnd = new Random(50);
-                NubePuntos3d nube = new  NubePuntos3d(20,new Color3f(1,0,0));
+    for (int j = 0; j < 20; j++) {
+        nube.addPunto(new Punto3d(rnd.nextFloat() * (90 - (-90) + 1) + (-90), rnd.nextFloat() * (90 - (-90) + 1) + (-90), rnd.nextFloat() * (90 - (-90) + 1) + (-90)));
+    }
+    
+    /*********** CARGAMOS OBJETO .OBJ ***********/
+    ObjetoTrian ot = new ObjetoTrian("./objetos3d/torus_knot.obj");
+    VisuObjetoTrian vot = new VisuObjetoTrian(ot);
+    vot.pinta(trans, cadenaApp(0.3f, 0.3f));
 
-                for (int j=0;j<20;j++){
 
-                    nube.addPunto(new Punto3d(rnd.nextFloat()*(90-(-90)+1)+(-90), rnd.nextFloat()*(90-(-90)+1)+(-90),rnd.nextFloat()*(90-(-90)+1)+(-90)));
+    /*********** COMPROBAMOS PUNTOS DENTRO Y PUNTOS FUERA ***********/
+    for (int j = 0; j < nube.numPuntos(); j++) {
 
-                }
-//                VisuNube3d vinube = new VisuNube3d(nube);
-//                vinube.pinta(trans,cadenaApp());
-                
-                ObjetoTrian ot = new ObjetoTrian ("./objetos3d/lata_cerveza.obj");
-                VisuObjetoTrian vot = new VisuObjetoTrian (ot);
-                vot.pinta(trans,cadenaApp(0.3f,0.3f));
-               
-                for(int j=0;j<nube.numPuntos();j++){
-                    if(ot.puntoEnObjeto(new Punto3d(-0.2f,0.39f,0.03f))){
-                        VisuPunto3d viPunto = new VisuPunto3d(new Punto3d(-0.2f,0.39f,0.03f));
-                        viPunto.pinta(trans, cadenaApp(), 0.0f, 1.0f, 0.0f);
-                    }
-                }
-                
-                Punto3d pin = new Punto3d (0, 0,0);
-                VisuPunto3d vpin = new VisuPunto3d(pin);
-                vpin.pinta(trans,cadenaApp());
-                NubePuntos3d np = new NubePuntos3d(ot.getNubePuntos());
-                VisuNube3d vnp = new VisuNube3d (np);
-                vnp.pinta(trans,cadenaApp(0.5f,0.4f),1f,1f,1f);
+        if (ot.puntoEnObjeto(nube.getPunto(j))) {
+            VisuPunto3d viPunto = new VisuPunto3d(nube.getPunto(j));
+            viPunto.pinta(trans, cadenaApp(), 0.0f, 1.0f, 0.0f);
+        } else {
+            VisuPunto3d viPunto = new VisuPunto3d(nube.getPunto(j));
+            viPunto.pinta(trans, cadenaApp(), 1.0f, 0.0f, 0.0f);
+        }
+    }
+    
+    /*********** GENERAMOS LA CAJA ENVOLVENTE ***********/
+    CajaEnvolvente caja = ot.getCajaEnvolvente();
+    VisuCajaEnvolvente visuCaja = new VisuCajaEnvolvente(caja);
+    visuCaja.pinta(trans, cadenaApp());
+
+    //Mueve
+//    ot.mover(50, 50, 50);
+//    VisuObjetoTrian vor = new VisuObjetoTrian(ot);
+//    vor.pinta(trans, cadenaApp(0.3f, 0.3f));
+
+    /*********** RAYO QUE INTERSECTA EL OBJETO ***********/
+    Vector3d direccion = new Vector3d(1000, 800, 1000);//Cualquier direccion
+    Rayo3d r = new Rayo3d(new Vector3d(3.0f, .39f, -53.03f), direccion);
+    VisuRayo3d ravi = new VisuRayo3d(r);
+    ravi.pinta(trans, cadenaApp(), 0.0f, 0.0f, 1.0f);
+
+    //Comprobamos si intersecta el objeto con el rayo
+
+    if (ot.IntersectaRayo3d(r)) {
+        System.out.println("Rayo1 intersecta con figura");
+    } else {
+        System.out.println("Rayo1 No intersecta rayo");
+    }
+
+    /*********** RAYO QUE SOLO INTERSECTA LA CAJA ***********/
+    Vector3d dire = new Vector3d(100, -200, 1000);//Cualquier direccion
+    Rayo3d re = new Rayo3d(new Vector3d(70f, -70, 90.03f), direccion);
+    VisuRayo3d rav = new VisuRayo3d(re);
+    rav.pinta(trans, cadenaApp(), 0.0f, 0.0f, 1.0f);
+
+    if (ot.IntersectaRayo3d(re)) {
+        System.out.println("Rayo2 intersecta con figura");
+    } else {
+        System.out.println("Rayo2 No intersecta rayo");
+    }
+    
+    /*********** ORIGEN (0,0,0) ***********/
+    Punto3d pin = new Punto3d(0, 0, 0);
+    VisuPunto3d vpin = new VisuPunto3d(pin);
+    vpin.pinta(trans, cadenaApp());
+    NubePuntos3d np = new NubePuntos3d(ot.getNubePuntos());
+    VisuNube3d vnp = new VisuNube3d(np);
+    vnp.pinta(trans, cadenaApp(0.5f, 0.4f), 1f, 1f, 1f);
               
 }
 

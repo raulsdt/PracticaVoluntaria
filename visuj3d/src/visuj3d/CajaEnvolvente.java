@@ -19,8 +19,8 @@ import javax.vecmath.Point3d;
  */
 public class CajaEnvolvente {
 
-    Punto3d supDer;
-    Punto3d infIzq;
+    Punto3d supDer; // Punto superior Derecho que define la caja
+    Punto3d infIzq; // Punto inferior izquierda que define la caja
 
     public CajaEnvolvente(Punto3d s, Punto3d i) {
         supDer = new Punto3d(s);
@@ -32,46 +32,12 @@ public class CajaEnvolvente {
         infIzq = new Punto3d(ot.getCajaEnvolvente().infIzq);
     }
 
-    public CajaEnvolvente(String camino) {
+    public CajaEnvolvente(String camino)throws ErrorRangoObjInvalido {
 
-        int flags = ObjectFile.RESIZE;
-        ObjectFile f = new ObjectFile(flags);
-        Scene s = null;
-        try {
-            s = f.load(camino);
-        } catch (Exception e) {
-            System.err.println(e);
-            System.exit(1);
-        }
-        Hashtable namedObjects = s.getNamedObjects();
-        Enumeration e = namedObjects.keys();
-
-        while (e.hasMoreElements()) {
-            String name = (String) e.nextElement();
-
-            Shape3D shape = (Shape3D) namedObjects.get(name);
-
-            for (int i = 0; i < shape.numGeometries(); i++) {
-                // Conseguir los vetices de la geometria de un obj
-
-                GeometryArray geom = (GeometryArray) shape.getGeometry(i);
-
-                //! tambien se puede hacer esto para obtener los triangulos
-                //TriangleArray ta = (TriangleArray) shape.getGeometry(i);
-
-                //puntos tiene toda la geometr�; las coordenadas de cada v�tice est� en las posiciones [3,4,5]
-                float puntos[];
-                puntos = geom.getInterleavedVertices();
-                if (puntos[0] < puntos[3]) {
-                    supDer = new Punto3d(puntos[3], puntos[4], puntos[5]);
-                    infIzq = new Punto3d(puntos[0], puntos[1], puntos[2]);
-                } else {
-                    supDer = new Punto3d(puntos[0], puntos[1], puntos[2]);
-                    infIzq = new Punto3d(puntos[3], puntos[4], puntos[5]);
-                }
-            }
-
-        }
+        ObjetoTrian ot = new ObjetoTrian(camino);
+        supDer = ot.getCajaEnvolvente().supDer;
+        infIzq = ot.getCajaEnvolvente().infIzq;
+        
     }
 
     public CajaEnvolvente(NubePuntos3d n) throws ErrorRangoNubeInvalido {
@@ -108,15 +74,26 @@ public class CajaEnvolvente {
 
 
     }
-
+    /**
+     * Devuelve el punto minimo d ela caja envolvente
+     * @return  Punto minimo
+     */
     public Punto3d getMinimo() {
         return infIzq;
     }
-
+    /**
+     * Devuelve el punto maximo que define la caja envolvente
+     * @return PUnto Maximo
+     */
     public Punto3d getMaximo() {
         return supDer;
     }
 
+    /**
+     * Comprueba si existe intersección entre dos cajas envolventes
+     * @param ce Caja envolvente a la que le qyueremos comprobar la intersección
+     * @return True si se produce intersección, y false en cualquier otro caso.
+     */
     public boolean intersecta(CajaEnvolvente ce) {
         BoundingBox cajaClase = new BoundingBox(new Point3d(infIzq.getX(), infIzq.getY(), infIzq.getZ()), 
                 new Point3d(supDer.getX(), supDer.getY(), supDer.getZ()) );
